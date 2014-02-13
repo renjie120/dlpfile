@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fst_team_name_size">22dp</dimen>
+    <dimen name="text_size1">21dp</dimen>
+    <dimen name="text_size2">18dp</dimen>
+    <dimen name="text_size3">14dp</dimen>
+    <dimen name="titleheight">50dp</dimen>
+    <dimen name="titlebuttonheight">40dp</dimen>
+    <dimen name="buttonwidth">110dp</dimen>
+    <dimen name="buttonheight">40dp</dimen>
+    <dimen name="textsize">20sp</dimen>
+
+    <color name="gray">#C5CCD4</color>
+    <color name="titleColor">#B7130B</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="deppon">#373C64</color>
+    <color name="black2">#363636</color>
+
+</resources>

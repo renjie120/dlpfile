@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sidebar="http://schemas.android.com/apk/res/com.example.android.contactmanager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/menu_name"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/titleheight"
+        android:background="@color/deppon"
+        android:gravity="center"
+        android:text="@string/title"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fst_team_name_size" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_margin="5dp"
+        android:background="@drawable/shape_corner_gridview"
+        android:padding="2dip" >
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp" >
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/name_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/name_title"
+                    android:textSize="@dimen/textsize" />
+
+                <EditText
+                    android:id="@+id/inputName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/message_inputTitle" >
+                </EditText>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/pass_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/pass_title"
+                    android:textSize="@dimen/textsize" />
+
+                <EditText
+                    android:id="@+id/inputPass"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/message_inputPass"
+                    android:password="true" >
+                </EditText>
+            </TableRow>
+        </TableLayout>
+    </RelativeLayout>
+
+    <CheckBox
+        android:id="@+id/remember_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:text="@string/remember_password" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:padding="2dip" >
+
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="@dimen/buttonwidth"
+            android:layout_height="@dimen/buttonheight"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/yuanjiaobutton"
+            android:text="@string/message_login" >
+        </Button>
+
+        <Button
+            android:id="@+id/registLogin"
+            android:layout_marginLeft="10dp"
+            android:layout_width="@dimen/buttonwidth"
+            android:layout_height="@dimen/buttonheight"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/yuanjiaobutton"
+            android:text="@string/registLogin_login" >
+        </Button>
+    </LinearLayout>
+
+</LinearLayout>

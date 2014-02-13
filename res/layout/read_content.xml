@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sidebar="http://schemas.android.com/apk/res/com.example.android.contactmanager"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/titleheight" >
+
+        <TextView
+            android:id="@+id/menu_name"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/titleheight"
+            android:layout_gravity="center"
+            android:background="@color/deppon"
+            android:gravity="center"
+            android:text="@string/title_2"
+            android:textColor="@color/white"
+            android:textSize="@dimen/fst_team_name_size" />
+
+        <Button
+            android:id="@+id/callback_button"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/titlebuttonheight"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="10dp" 
+            android:text="@string/call_back" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_margin="5dp"
+        android:layout_weight="1"
+        android:background="@drawable/shape_corner_gridview" >
+
+        <TextView
+            android:id="@+id/mess1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/titleheight"
+            android:layout_marginTop="50dp"
+            android:gravity="center_horizontal"
+            android:text="@string/mess1"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size1" />
+
+        <TextView
+            android:id="@+id/mess2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/titleheight"
+            android:layout_below="@id/mess1"
+            android:layout_marginTop="10dp"
+            android:gravity="center_horizontal"
+            android:text="@string/mess2"
+            android:textSize="@dimen/text_size2" />
+
+        <TextView
+            android:id="@+id/mess3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/titleheight"
+            android:layout_below="@id/mess2"
+            android:layout_marginTop="160dp"
+            android:gravity="center_horizontal"
+            android:text="@string/mess3"
+            android:textColor="@color/black2"
+            android:textSize="@dimen/text_size3" />
+
+        <TextView
+            android:id="@+id/mess4"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/titleheight"
+            android:layout_below="@id/mess3" 
+            android:gravity="center_horizontal"
+            android:text="@string/mess4"
+            android:textColor="@color/black2"
+            android:textSize="@dimen/text_size3" />
+    </RelativeLayout>
+
+</LinearLayout>
