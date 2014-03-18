@@ -51,9 +51,9 @@ public class FileActivity extends Activity implements OnClickListener {
 	private Uri fileuri;
 	private String serialId;
 	// 全部过程超时时间为30秒钟
-	public static final int TIMEOUT = 30;
+	public static final int TIMEOUT = 3000;
 	// 等待多少秒之后，解密文件没有被第三方程序加载到内存中就直接删除
-	public static final int WAIT = 20;
+	public static final int WAIT = 2000;
 	private boolean chaoshi = false;
 	public Handler myHandler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -83,89 +83,28 @@ public class FileActivity extends Activity implements OnClickListener {
 		Uri uri = Uri.fromFile(extDir);
 		String fileName = extDir.getAbsolutePath();
 		PackageManager pm = this.getPackageManager();
-		// Intent mainIntent = new Intent();
-		// Intent mainIntent = new Intent("android.intent.action.VIEW");
-		// 以下是对Intent进行过滤，
-		// // mainIntent.setAction(Intent.ACTION_VIEW);
-		// mainIntent.addCategory("android.intent.category.DEFAULT");
-		// mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		// if (fileName.endsWith(".pdf")) {
-		// mainIntent.setDataAndType(uri, "application/pdf");
-		// } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
-		// mainIntent.setDataAndType(uri, "application/msword");
-		// } else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-		// mainIntent.setDataAndType(uri, "vnd.ms-powerpoint");
-		// } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx")) {
-		// mainIntent.setDataAndType(uri, "application/vnd.ms-excel");
-		// } else if (fileName.endsWith(".gif")) {
-		// mainIntent.setDataAndType(uri, "image/gif");
-		// } else if (fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
-		// mainIntent.setDataAndType(uri, "image/jpeg");
-		// }
-		// // 或许过滤后的Activities信息。此处需要注意一下的是第二个参数静态常量的设置影响你获取的结果，
-		// // 我这里设置的默认，也就是全部。还可以设置只获取系统的，等等
-		// List resolveInfos = pm.queryIntentActivities(mainIntent,
-		// PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
-		//
-		// for (Iterator iterator = resolveInfos.iterator();
-		// iterator.hasNext();) {
-		// ResolveInfo resolveInfo = (ResolveInfo) iterator.next();
-		// String nameapp = resolveInfo.activityInfo.name;
-		// String namepack = resolveInfo.activityInfo.packageName;
-		// String lable = (String) resolveInfo.loadLabel(pm);
-		// System.out.println("应用程序包名：" + namepack + " 应用程序入口Activity:"
-		// + nameapp + " 程序名：" + lable);
-		// }
-		// mainIntent.setPackage("com.mobisystems.office");
-		// // mainIntent.setComponent(new
-		// ComponentName("com.mobisystems.office",
-		// "Activity:com.mobisystems.office.pdf.PdfViewerLauncher"));
-		// this.startActivity(mainIntent);
 
-		try { 
-			if (!(fileName.endsWith(".doc") ||fileName.endsWith(".ppt") || fileName.endsWith(".xls"))) {
-				Intent intent = new Intent("android.intent.action.VIEW");
-				intent.addCategory("android.intent.category.DEFAULT");
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				if (fileName.endsWith(".pdf")) {
-					intent.setDataAndType(uri, "application/pdf");
-				} else if (fileName.endsWith(".docx")) {
-					// intent.setPackage("com.mobisystems.office");
-					intent.setDataAndType(uri, "application/msword");
-				} else if (fileName.endsWith(".ppt")
-						|| fileName.endsWith(".pptx")) { 
-					intent.setDataAndType(uri, "vnd.ms-powerpoint");
-				} else if (fileName.endsWith(".xlsx")) { 
-					intent.setDataAndType(uri, "application/vnd.ms-excel");
-				} else if (fileName.endsWith(".gif")) {
-					intent.setDataAndType(uri, "image/gif");
-				} else if (fileName.endsWith(".jpeg")
-						|| fileName.endsWith(".jpg")) {
-					intent.setDataAndType(uri, "image/jpeg");
-				}
-				if (!chaoshi) {
-					this.startActivity(intent);
-					Thread.sleep(WAIT * 1000);
-				}
-			} else {
-				if (fileName.endsWith(".doc")) {
-					Intent intent = new Intent();
-					intent.setClass(FileActivity.this, Word2003Read.class);
-					intent.putExtra("filepath", fileName);
-					startActivity(intent);
-				} else if (fileName.endsWith(".xls")) {
-					Intent intent = new Intent();
-					intent.setClass(FileActivity.this, Excel2003Read.class);
-					intent.putExtra("filepath", fileName);
-					startActivity(intent);
-				}else if (fileName.endsWith(".ppt")) {
-					Intent intent = new Intent();
-					intent.setClass(FileActivity.this, Excel2003Read.class);
-					intent.putExtra("filepath", fileName);
-					startActivity(intent);
-				}
+		try {
 
+			Intent intent = new Intent("android.intent.action.VIEW");
+			intent.addCategory("android.intent.category.DEFAULT");
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			if (fileName.endsWith(".pdf")) {
+				intent = new Intent(Intent.ACTION_VIEW, uri);
+				intent.setClass(this,
+						org.vudroid.pdfdroid.PdfViewerActivity.class);
+			} 
+			else if (fileName.endsWith(".gif")) {
+				intent.setDataAndType(uri, "image/gif");
+			} else if (fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+				intent.setDataAndType(uri, "image/jpeg");
+			} else if (fileName.endsWith(".png")) {
+				intent.setDataAndType(uri, "image/png");
 			}
+			if (!chaoshi) {
+				this.startActivity(intent);
+				Thread.sleep(WAIT * 1000);
+			} 
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -183,7 +122,7 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * @param byts
 	 */
 	private void saveFile(File extDir, String filename, byte[] byts) {
-		File fullFilename = null;// = new File(extDir, filename);
+		File fullFilename = null; 
 		try {
 			String dirName = extDir.getAbsolutePath() + "/dlpfiles";
 			File newExtDir = new File(dirName);
@@ -200,6 +139,7 @@ public class FileActivity extends Activity implements OnClickListener {
 			bufferedOutputStream.write(byts);
 			bufferedOutputStream.close();
 
+			System.out.println("即将打开文件：" + fullFilename);
 			openFileWithWord(fullFilename);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -267,22 +207,30 @@ public class FileActivity extends Activity implements OnClickListener {
 					MultipartEntityBuilder builder = MultipartEntityBuilder
 							.create().addPart("file", bin);
 					// 正式环境上面，继续添加几个参数.
-					if (!MainActivity.ISDEBUG) {
-						StringBody namebody = new StringBody(name,
-								ContentType.TEXT_PLAIN);
-						StringBody passbody = new StringBody(pass,
-								ContentType.TEXT_PLAIN);
-						StringBody serialIdbody = new StringBody(serialId,
-								ContentType.TEXT_PLAIN);
-						builder = builder.addPart("userId", namebody)
-								.addPart("password", passbody)
-								.addPart("serial", serialIdbody);
-					}
+					StringBody namebody = new StringBody(name,
+							ContentType.TEXT_PLAIN);
+					StringBody passbody = new StringBody(pass,
+							ContentType.TEXT_PLAIN);
+					StringBody filenamebody = new StringBody(filename,
+							ContentType.TEXT_PLAIN);
+					StringBody serialIdbody = new StringBody(serialId,
+							ContentType.TEXT_PLAIN);
+					builder = builder.addPart("userId", namebody)
+							.addPart("password", passbody)
+							.addPart("filename", filenamebody)
+							.addPart("serial", serialIdbody);
 					HttpEntity reqEntity = builder.build();
 					httppost.setEntity(reqEntity);
 					// 调用请求，将返回结果保存到本地文件.
 					byte[] charts = httpclient.execute(httppost, handler);
 					// 保存到本地文件流.
+					if (filename.endsWith(".docx") || filename.endsWith(".xls")
+							|| filename.endsWith(".xlsx")
+							|| filename.endsWith(".ppt")
+							|| filename.endsWith(".pptx")
+							|| filename.endsWith(".doc")) {
+						filename = filename.replace(".", "_") + ".pdf";
+					}
 					saveFile(extDir, filename, charts);
 				}
 
@@ -367,20 +315,20 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * 删除文件.
 	 */
 	private void deleteFile() {
-		// try {
-		// File extDir = Environment.getExternalStorageDirectory();
-		// String dirName = extDir.getAbsolutePath() + "/dlpfiles";
-		// File newExtDir = new File(dirName);
-		// if (newExtDir.exists()) {
-		// File[] fls = newExtDir.listFiles();
-		// for (File f : fls) {
-		// f.delete();
-		// }
-		// }
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// myHandler.sendEmptyMessage(2);
-		// }
+		try {
+			File extDir = Environment.getExternalStorageDirectory();
+			String dirName = extDir.getAbsolutePath() + "/dlpfiles";
+			File newExtDir = new File(dirName);
+			if (newExtDir.exists()) {
+				File[] fls = newExtDir.listFiles();
+				for (File f : fls) {
+					f.delete();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			myHandler.sendEmptyMessage(2);
+		}
 	}
 
 	public void onDestroy() {

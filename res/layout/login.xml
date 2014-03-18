@@ -95,10 +95,10 @@
 
         <Button
             android:id="@+id/registLogin"
-            android:layout_marginLeft="10dp"
             android:layout_width="@dimen/buttonwidth"
             android:layout_height="@dimen/buttonheight"
             android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="10dp"
             android:background="@drawable/yuanjiaobutton"
             android:text="@string/registLogin_login" >
         </Button>

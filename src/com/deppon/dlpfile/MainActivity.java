@@ -52,21 +52,19 @@ import android.widget.EditText;
  * 
  */
 public class MainActivity extends Activity implements OnClickListener {
-	// public static final String LOGINURL =
-	// "http://192.168.67.47/center/checkLogin";
-	// public static final String FILEURL =
-	// "http://192.168.67.47/center/decryptFile?userId=145959&serial=A6909CE7-D80D-413A-8C38-347EA48C30E1";
 	public static String EMALADDRESS = "dpmobile@deppon.com";
 	public static String LOGINURL = "http://app.deppon.com/center/checkLogin";
 	public static String FILEURL = "http://app.deppon.com/center/decryptFile";
 
-	//false：正式环境.
-	public static final boolean ISDEBUG = false;
+	// false：正式环境.
+	public static final boolean ISDEBUG = true;
 	static {
 		if (ISDEBUG) {
 			EMALADDRESS = "lishuiqing110@163.com";
+			// LOGINURL = "http://10.224.70.10:8081/center/checkLogin";
+			// FILEURL = "http://10.224.70.10:8081/center/decryptFile";
 			LOGINURL = "http://192.168.67.47/center/checkLogin";
-			FILEURL = "http://192.168.67.47/center/decryptFile?userId=145959&serial=A6909CE7-D80D-413A-8C38-347EA48C30E1";
+			FILEURL = "http://192.168.67.47/center/decryptFile";
 		}
 	}
 	private EditText inputPass;
@@ -111,8 +109,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			pass = inputPass.getText().toString();
 			Map params = new HashMap();
 			deviceId = tm.getDeviceId();
-			if (ISDEBUG)
-				deviceId = "http://192.168.67.47/center/checkLogin";
 			params.put("serial", deviceId);
 			params.put("userId", name);
 			params.put("password", pass);
@@ -393,7 +389,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void login(final String url, final Map params, final String encoding) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
-
+			System.out.println("请求登陆地址：" + url);
 			HttpPost httpost = new HttpPost(url);
 			// 添加参数
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
