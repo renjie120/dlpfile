@@ -41,20 +41,21 @@ public final class R {
         public static final int arrowup=0x7f020000;
         public static final int book=0x7f020001;
         public static final int center=0x7f020002;
-        public static final int folderopen=0x7f020003;
-        public static final int gallery_zoom_in=0x7f020004;
-        public static final int gallery_zoom_in_touch=0x7f020005;
-        public static final int gallery_zoom_out=0x7f020006;
-        public static final int gallery_zoom_out_touch=0x7f020007;
-        public static final int ic_launcher=0x7f020008;
-        public static final int icon=0x7f020009;
-        public static final int left=0x7f02000a;
-        public static final int pdf=0x7f02000b;
-        public static final int right=0x7f02000c;
-        public static final int serifs=0x7f02000d;
-        public static final int shape_corner_gridview=0x7f02000e;
-        public static final int yuanjiaobutton=0x7f02000f;
-        public static final int zoomin=0x7f020010;
+        public static final int close=0x7f020003;
+        public static final int folderopen=0x7f020004;
+        public static final int gallery_zoom_in=0x7f020005;
+        public static final int gallery_zoom_in_touch=0x7f020006;
+        public static final int gallery_zoom_out=0x7f020007;
+        public static final int gallery_zoom_out_touch=0x7f020008;
+        public static final int ic_launcher=0x7f020009;
+        public static final int icon=0x7f02000a;
+        public static final int left=0x7f02000b;
+        public static final int pdf=0x7f02000c;
+        public static final int right=0x7f02000d;
+        public static final int serifs=0x7f02000e;
+        public static final int shape_corner_gridview=0x7f02000f;
+        public static final int yuanjiaobutton=0x7f020010;
+        public static final int zoomin=0x7f020011;
     }
     public static final class id {
         public static final int action_settings=0x7f09001f;

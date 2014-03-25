@@ -27,6 +27,7 @@
             android:layout_height="@dimen/titlebuttonheight"
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="10dp" 
+            android:visibility="gone"
             android:text="@string/call_back" />
     </FrameLayout>
 

@@ -44,27 +44,39 @@ import android.widget.Button;
  * @author 130126
  * 
  */
-public class FileActivity extends Activity implements OnClickListener {
+public class FileActivity extends Activity implements OnClickListener { 
+	// 返回按钮
 	private Button callbackButton;
+	// 用户名
 	private String name;
+	// 密码
 	private String pass;
+	// 最大文件大小.
+	private long maxFileLength = 2 * 1024 * 1024;
+	// 文件名
 	private Uri fileuri;
 	private String serialId;
 	// 全部过程超时时间为30秒钟
-	public static final int TIMEOUT = 3000;
+	public static final int TIMEOUT = 100;
 	// 等待多少秒之后，解密文件没有被第三方程序加载到内存中就直接删除
-	public static final int WAIT = 2000;
+	public static final int WAIT = 50;
 	private boolean chaoshi = false;
 	public Handler myHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case 1:
 				chaoshi = true;
-				alert("请求超时，请稍候重试！");
-				removeDialog(DIALOG_KEY);
+				//alert("请求超时，请稍候重试。");
+				//removeDialog(DIALOG_KEY);
 				break;
 			case 2:
-				alert("程序出现异常,请反馈,异常编号0034！");
+				alert("程序出现异常,请反馈。");
+				break;
+			case 3:
+				alert("文件不得大于2M");
+				break;
+			case 4:
+				removeDialog(DIALOG_KEY);
 				break;
 			default:
 				super.hasMessages(msg.what);
@@ -80,31 +92,43 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * @param filename
 	 */
 	private void openFileWithWord(File extDir) {
+		// 文件
 		Uri uri = Uri.fromFile(extDir);
+		// 文件名
 		String fileName = extDir.getAbsolutePath();
+		// pm
 		PackageManager pm = this.getPackageManager();
 
 		try {
-
+			// 初始化
 			Intent intent = new Intent("android.intent.action.VIEW");
 			intent.addCategory("android.intent.category.DEFAULT");
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			// pdf文件
 			if (fileName.endsWith(".pdf")) {
 				intent = new Intent(Intent.ACTION_VIEW, uri);
 				intent.setClass(this,
 						org.vudroid.pdfdroid.PdfViewerActivity.class);
-			} 
+			}
+			// gif图片
 			else if (fileName.endsWith(".gif")) {
 				intent.setDataAndType(uri, "image/gif");
-			} else if (fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
-				intent.setDataAndType(uri, "image/jpeg");
-			} else if (fileName.endsWith(".png")) {
-				intent.setDataAndType(uri, "image/png");
 			}
-			if (!chaoshi) {
-				this.startActivity(intent);
-				Thread.sleep(WAIT * 1000);
+			// jpg图片
+			else if (fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+				intent.setDataAndType(uri, "image/jpeg");
+			}
+			// png图片
+			else if (fileName.endsWith(".png")) {
+				intent.setDataAndType(uri, "image/png");
 			} 
+			// 是否超时
+			if (!chaoshi) {
+				myHandler.sendEmptyMessage(4);
+				this.startActivity(intent);
+				FileActivity.this.finish(); 
+				Thread.sleep(WAIT * 1000);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -122,26 +146,36 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * @param byts
 	 */
 	private void saveFile(File extDir, String filename, byte[] byts) {
-		File fullFilename = null; 
+		// 文件全名
+		File fullFilename = null;
 		try {
+			// 目录
 			String dirName = extDir.getAbsolutePath() + "/dlpfiles";
+			// 新地址
 			File newExtDir = new File(dirName);
+			// 目录不存在就创建
 			if (!newExtDir.exists()) {
 				newExtDir.mkdir();
-				newExtDir.setWritable(true);
+				//newExtDir.setWritable(true);
 			}
+			// 如果已经存在就删除
 			fullFilename = new File(newExtDir, filename);
+			// 删除临时文件夹里面文件
 			if (fullFilename.exists()) {
 				fullFilename.deleteOnExit();
 			}
+			// 写文件流
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
 					new FileOutputStream(fullFilename));
+			// 写进去
 			bufferedOutputStream.write(byts);
+			// 关闭文件流
 			bufferedOutputStream.close();
 
-			System.out.println("即将打开文件：" + fullFilename);
+			// 打开文件
 			openFileWithWord(fullFilename);
 		} catch (IOException e) {
+			// 补货异常
 			e.printStackTrace();
 		} finally {
 
@@ -156,26 +190,39 @@ public class FileActivity extends Activity implements OnClickListener {
 	ResponseHandler<byte[]> handler = new ResponseHandler<byte[]>() {
 		public byte[] handleResponse(HttpResponse response)
 				throws ClientProtocolException, IOException {
+			// 得到返回对象
 			HttpEntity entity = response.getEntity();
+			// 进行处理
 			if (entity != null) {
 				return EntityUtils.toByteArray(entity);
-			} else {
+			}
+			// 不进行处理
+			else {
 				return null;
 			}
 		}
 	};
-
+	// 弹出框
 	private static final int DIALOG_KEY = 0;
+	// dialog变量
 	private ProgressDialog dialog;
+	// 文件大小
+	private long fileLen = 0;
 
+	// 异步任务
 	private class MyListLoader extends AsyncTask<String, String, String> {
-
+		// 显示dialog
 		private boolean showDialog;
+		// 文件名
 		private String name = null;
+		// 密码
 		private String pass = null;
+		// 序号
 		private String serialId = null;
+		// wenjian
 		private Uri uri = null;
 
+		// 构造函数
 		public MyListLoader(boolean showDialog, String name, String pass,
 				String serialId, Uri uri) {
 			this.showDialog = showDialog;
@@ -187,51 +234,72 @@ public class FileActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected void onPreExecute() {
+			// 显示
 			if (showDialog) {
 				showDialog(DIALOG_KEY);
 			}
 		}
 
+		/**
+		 * 后台
+		 */
 		public String doInBackground(String... p) {
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			try {
 				// 先删除一次目录！
 				deleteFile();
+				// 文件存在
 				if (fileuri != null) {
+					// 得到sd卡
 					File extDir = Environment.getExternalStorageDirectory();
 					String filepath = fileuri.getPath();
 					File oldFile = new File(filepath);
-					String filename = oldFile.getName();
-					HttpPost httppost = new HttpPost(MainActivity.FILEURL);
-					FileBody bin = new FileBody(oldFile);
-					MultipartEntityBuilder builder = MultipartEntityBuilder
-							.create().addPart("file", bin);
-					// 正式环境上面，继续添加几个参数.
-					StringBody namebody = new StringBody(name,
-							ContentType.TEXT_PLAIN);
-					StringBody passbody = new StringBody(pass,
-							ContentType.TEXT_PLAIN);
-					StringBody filenamebody = new StringBody(filename,
-							ContentType.TEXT_PLAIN);
-					StringBody serialIdbody = new StringBody(serialId,
-							ContentType.TEXT_PLAIN);
-					builder = builder.addPart("userId", namebody)
-							.addPart("password", passbody)
-							.addPart("filename", filenamebody)
-							.addPart("serial", serialIdbody);
-					HttpEntity reqEntity = builder.build();
-					httppost.setEntity(reqEntity);
-					// 调用请求，将返回结果保存到本地文件.
-					byte[] charts = httpclient.execute(httppost, handler);
-					// 保存到本地文件流.
-					if (filename.endsWith(".docx") || filename.endsWith(".xls")
-							|| filename.endsWith(".xlsx")
-							|| filename.endsWith(".ppt")
-							|| filename.endsWith(".pptx")
-							|| filename.endsWith(".doc")) {
-						filename = filename.replace(".", "_") + ".pdf";
+					fileLen = oldFile.length();
+					if (fileLen > maxFileLength) {
+						myHandler.sendEmptyMessage(3);
+					} else {
+						String filename = oldFile.getName();
+						// 得到请求
+						HttpPost httppost = new HttpPost(MainActivity.FILEURL);
+						// 添加文件
+						FileBody bin = new FileBody(oldFile);
+						// 构造请求
+						MultipartEntityBuilder builder = MultipartEntityBuilder
+								.create().addPart("file", bin);
+						// 正式环境上面，继续添加几个参数.
+						StringBody namebody = new StringBody(name,
+								ContentType.TEXT_PLAIN);
+						// 添加参数
+						StringBody passbody = new StringBody(pass,
+								ContentType.TEXT_PLAIN);
+						// 添加参数
+						StringBody filenamebody = new StringBody(filename,
+								ContentType.TEXT_PLAIN);
+						// 添加参数
+						StringBody serialIdbody = new StringBody(serialId,
+								ContentType.TEXT_PLAIN);
+						// 添加参数
+						builder = builder.addPart("userId", namebody)
+								.addPart("password", passbody)
+								.addPart("filename", filenamebody)
+								.addPart("serial", serialIdbody);
+						HttpEntity reqEntity = builder.build();
+						httppost.setEntity(reqEntity);
+						// 调用请求，将返回结果保存到本地文件.
+						byte[] charts = httpclient.execute(httppost, handler);
+						// 保存到本地文件流.
+						if (filename.endsWith(".docx")
+								|| filename.endsWith(".xls")
+								|| filename.endsWith(".xlsx")
+								|| filename.endsWith(".ppt")
+								|| filename.endsWith(".pptx")
+								|| filename.endsWith(".doc")) {
+							// 如果是office系列就进行文件名转换
+							filename = filename.replace(".", "_") + ".pdf";
+						}
+						// 保存返回的二进制流
+						saveFile(extDir, filename, charts);
 					}
-					saveFile(extDir, filename, charts);
 				}
 
 			} catch (Exception e) {
@@ -275,37 +343,55 @@ public class FileActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		System.out.println("file---onCreate");
+		// 设置布局文件
 		setContentView(R.layout.read_content);
+		// 得到页面变量
 		Intent intent = getIntent();
 		name = intent.getStringExtra("name");
 		pass = intent.getStringExtra("pass");
 		serialId = intent.getStringExtra("serialId");
+		// 文件流
 		fileuri = (Uri) intent.getParcelableExtra("fileurl");
+		System.out.println("file---name=" + name + ",serialId=" + serialId
+				+ ",fileuri=" + fileuri);
+
+		// 按钮
 		callbackButton = (Button) findViewById(R.id.callback_button);
 		callbackButton.setOnClickListener(this);
 		// commitFile();
 		// 进行一次处理之后，就设置name为空。
-		final MyListLoader task = new MyListLoader(true, name, pass, serialId,
-				fileuri);
-		task.execute("");
-		new Thread() {
-			public void run() {
-				try {
-					/**
-					 * 在这里你可以设置超时的时间 切记：这段代码必须放到线程中执行，因为不放单独的线程中执行的话该方法会冻结UI线程
-					 * 直接导致onPreExecute()方法中的弹出框不会立即弹出。
-					 */
-					task.get(TIMEOUT, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-				} catch (ExecutionException e) {
-				} catch (TimeoutException e) {
-					task.cancel(true);
-					myHandler.sendEmptyMessage(1);
-				}// 请求超时
-			};
-		}.start();
-	}
 
+		if (fileuri != null) {
+			final MyListLoader task = new MyListLoader(true, name, pass,
+					serialId, fileuri);
+			task.execute("");
+			new Thread() {
+				public void run() {
+					try {
+						/**
+						 * 在这里你可以设置超时的时间
+						 * 切记：这段代码必须放到线程中执行，因为不放单独的线程中执行的话该方法会冻结UI线程
+						 * 直接导致onPreExecute()方法中的弹出框不会立即弹出。
+						 */
+						task.get(TIMEOUT, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+					} catch (ExecutionException e) {
+					} catch (TimeoutException e) {
+						task.cancel(true);
+						myHandler.sendEmptyMessage(1);
+					}// 请求超时
+				};
+			}.start();
+		}
+	}
+ 
+
+	/**
+	 * 弹出框
+	 * 
+	 * @param mess
+	 */
 	public void alert(String mess) {
 		new AlertDialog.Builder(FileActivity.this).setTitle("提示")
 				.setMessage(mess).setPositiveButton("确定", null).show();
@@ -342,6 +428,7 @@ public class FileActivity extends Activity implements OnClickListener {
 			if (v.getId() == R.id.callback_button) {
 				Intent data = new Intent(Intent.ACTION_SENDTO);
 				data.setData(Uri.parse("mailto:" + MainActivity.EMALADDRESS));
+				// 得到程序版本
 				PackageInfo info = getPackageManager().getPackageInfo(
 						getPackageName(), 0);
 				data.putExtra(Intent.EXTRA_SUBJECT, "关于德邦DLP反馈的邮件");
@@ -351,7 +438,6 @@ public class FileActivity extends Activity implements OnClickListener {
 				startActivity(data);
 			}
 		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
