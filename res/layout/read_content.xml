@@ -22,12 +22,11 @@
             android:textSize="@dimen/fst_team_name_size" />
 
         <Button
-            android:id="@+id/callback_button"
+            android:id="@+id/return_button"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/titlebuttonheight"
             android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="10dp" 
-            android:visibility="gone"
+            android:layout_marginRight="10dp"  
             android:text="@string/call_back" />
     </FrameLayout>
 

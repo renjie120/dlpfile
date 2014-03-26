@@ -143,7 +143,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		mSharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		in = getIntent();
-
+		//是否从详情页面返回来的首页.
+		String isBack = in.getStringExtra("back");
 		// 打开intent
 		if (in != null && in.getData() != null) {
 			openFile = in.getData();
@@ -155,8 +156,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		String pass = mSharedPreferences.getString("pass", "");
 		String user = mSharedPreferences.getString("userId", "");
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
-		// zhuceLogin = (Button) findViewById(R.id.registLogin);
-		System.out.println("main--onCreate,,remeber==" + remeber);
+		// zhuceLogin = (Button) findViewById(R.id.registLogin); 
 		// 选择了记住密码
 		if ("true".equals(remeber)) {
 			remeberPassword.setChecked(true);
@@ -205,11 +205,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			inputPass.setText(pass);
 			remeberPassword.setChecked(true);
 			inputUser.setText(user);
-			// 如果有文件，就直接登录.
-			if (in != null && in.getData() != null) {
-				go(openFile);
-			} else {
-				go(null);
+			// 如果不是点击的返回按钮回退的，并且有文件，就直接登录.
+			if(!"true".equals(isBack)){
+				if (in != null && in.getData() != null) {
+					go(openFile);
+				} else {
+					go(null);
+				}
 			}
 		}
 	}

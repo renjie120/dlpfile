@@ -70,7 +70,6 @@ public final class R {
         public static final int button6=0x7f09000c;
         public static final int button7=0x7f09000d;
         public static final int buttonLogin=0x7f090016;
-        public static final int callback_button=0x7f090017;
         public static final int content=0x7f09001c;
         public static final int edittext1=0x7f090008;
         public static final int goToButton=0x7f09000f;
@@ -87,6 +86,7 @@ public final class R {
         public static final int pager=0x7f090000;
         public static final int pass_title=0x7f090013;
         public static final int remember_password=0x7f090015;
+        public static final int return_button=0x7f090017;
         public static final int show=0x7f09001d;
         public static final int test_view=0x7f090005;
     }

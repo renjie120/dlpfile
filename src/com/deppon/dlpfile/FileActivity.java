@@ -46,7 +46,7 @@ import android.widget.Button;
  */
 public class FileActivity extends Activity implements OnClickListener {
 	// 返回按钮
-	private Button callbackButton;
+	private Button returnBtn;
 	// 用户名
 	private String name;
 	// 密码
@@ -360,12 +360,10 @@ public class FileActivity extends Activity implements OnClickListener {
 		serialId = intent.getStringExtra("serialId");
 		// 文件流
 		fileuri = (Uri) intent.getParcelableExtra("fileurl");
-		System.out.println("file---name=" + name + ",serialId=" + serialId
-				+ ",fileuri=" + fileuri);
 
 		// 按钮
-		callbackButton = (Button) findViewById(R.id.callback_button);
-		callbackButton.setOnClickListener(this);
+		returnBtn = (Button) findViewById(R.id.return_button);
+		returnBtn.setOnClickListener(this);
 		// commitFile();
 		// 进行一次处理之后，就设置name为空。
 
@@ -430,21 +428,9 @@ public class FileActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		try {
-			if (v.getId() == R.id.callback_button) {
-				Intent data = new Intent(Intent.ACTION_SENDTO);
-				data.setData(Uri.parse("mailto:" + MainActivity.EMALADDRESS));
-				// 得到程序版本
-				PackageInfo info = getPackageManager().getPackageInfo(
-						getPackageName(), 0);
-				data.putExtra(Intent.EXTRA_SUBJECT, "关于德邦DLP反馈的邮件");
-				data.putExtra(Intent.EXTRA_TEXT, "DLP附件解密使用问题反馈：<br>OA用户:"
-						+ name + "<br>手机序号:" + serialId + "<br>程序版本号:"
-						+ info.versionName + "<br><br>问题如下：<br><br>");
-				startActivity(data);
-			}
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
+		Intent intent = new Intent(FileActivity.this, MainActivity.class);
+		intent.putExtra("back", "true");
+		FileActivity.this.finish();
+		startActivity(intent);
 	}
 }
