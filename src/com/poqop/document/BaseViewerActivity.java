@@ -1,5 +1,6 @@
 package com.poqop.document;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -58,7 +59,8 @@ public abstract class BaseViewerActivity extends Activity implements
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case 1:
-				BaseViewerActivity.this.finish();
+				//BaseViewerActivity.this.finish();
+				System.exit(0);
 				break;
 			default:
 				super.hasMessages(msg.what);
@@ -342,24 +344,25 @@ public abstract class BaseViewerActivity extends Activity implements
 				+ (menuItem.isChecked() ? "on" : "off"));
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_EXIT:
-			System.exit(0);
-			return true;
-		case MENU_GOTO:
-			showDialog(DIALOG_GOTO);
-			return true;
-		}
-		return false;
-	}
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		switch (item.getItemId()) {
+//		case MENU_EXIT:
+//			System.exit(0);
+//			return true;
+//		case MENU_GOTO:
+//			showDialog(DIALOG_GOTO);
+//			return true;
+//		}
+//		return false;
+//	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case DIALOG_GOTO:
-			return new GoToPageDialog(this, documentView, decodeService);
+			return null;
+			//return new GoToPageDialog(this, documentView, decodeService);
 		}
 		return null;
 	}

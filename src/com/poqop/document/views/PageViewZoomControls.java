@@ -1,5 +1,6 @@
 package com.poqop.document.views;
 
+
 import android.content.Context;
 import android.view.Gravity;
 import android.view.MotionEvent;

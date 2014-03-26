@@ -44,7 +44,7 @@ import android.widget.Button;
  * @author 130126
  * 
  */
-public class FileActivity extends Activity implements OnClickListener { 
+public class FileActivity extends Activity implements OnClickListener {
 	// 返回按钮
 	private Button callbackButton;
 	// 用户名
@@ -53,27 +53,32 @@ public class FileActivity extends Activity implements OnClickListener {
 	private String pass;
 	// 最大文件大小.
 	private long maxFileLength = 2 * 1024 * 1024;
+	// 提示文件超过1M大小
+	private long bigFileLength = 1 * 1024 * 1024;
 	// 文件名
 	private Uri fileuri;
 	private String serialId;
-	// 全部过程超时时间为30秒钟
-	public static final int TIMEOUT = 100;
-	// 等待多少秒之后，解密文件没有被第三方程序加载到内存中就直接删除
-	public static final int WAIT = 50;
+	// 全部过程超时时间为2分钟
+	public static final int TIMEOUT = 120;
+	// 等待50秒之后，解密文件没有被第三方程序加载到内存中就直接删除
+	public static final int WAIT = 120;
 	private boolean chaoshi = false;
 	public Handler myHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case 1:
 				chaoshi = true;
-				//alert("请求超时，请稍候重试。");
-				//removeDialog(DIALOG_KEY);
+				alert("请求超时，请稍候重试。");
+				// removeDialog(DIALOG_KEY);
 				break;
 			case 2:
 				alert("程序出现异常,请反馈。");
 				break;
 			case 3:
-				alert("文件不得大于2M");
+				alert("不支持超过2M的文件，建议通过PC端访问");
+				break;
+			case 5:
+				alert("文件大于1M,可能耗时比较长,是否继续进行?");
 				break;
 			case 4:
 				removeDialog(DIALOG_KEY);
@@ -121,12 +126,12 @@ public class FileActivity extends Activity implements OnClickListener {
 			// png图片
 			else if (fileName.endsWith(".png")) {
 				intent.setDataAndType(uri, "image/png");
-			} 
+			}
 			// 是否超时
 			if (!chaoshi) {
 				myHandler.sendEmptyMessage(4);
 				this.startActivity(intent);
-				FileActivity.this.finish(); 
+				FileActivity.this.finish();
 				Thread.sleep(WAIT * 1000);
 			}
 
@@ -156,7 +161,7 @@ public class FileActivity extends Activity implements OnClickListener {
 			// 目录不存在就创建
 			if (!newExtDir.exists()) {
 				newExtDir.mkdir();
-				//newExtDir.setWritable(true);
+				// newExtDir.setWritable(true);
 			}
 			// 如果已经存在就删除
 			fullFilename = new File(newExtDir, filename);
@@ -258,6 +263,9 @@ public class FileActivity extends Activity implements OnClickListener {
 					if (fileLen > maxFileLength) {
 						myHandler.sendEmptyMessage(3);
 					} else {
+						if (fileLen > maxFileLength) {
+							alert("文件大于1M,可能耗时比较长,是否继续进行?");
+						}
 						String filename = oldFile.getName();
 						// 得到请求
 						HttpPost httppost = new HttpPost(MainActivity.FILEURL);
@@ -343,7 +351,6 @@ public class FileActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		System.out.println("file---onCreate");
 		// 设置布局文件
 		setContentView(R.layout.read_content);
 		// 得到页面变量
@@ -385,7 +392,6 @@ public class FileActivity extends Activity implements OnClickListener {
 			}.start();
 		}
 	}
- 
 
 	/**
 	 * 弹出框

@@ -1,20 +1,8 @@
 package com.deppon.dlpfile;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -42,6 +30,14 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
+import com.litesuits.http.LiteHttpClient;
+import com.litesuits.http.async.HttpAsyncExcutor;
+import com.litesuits.http.data.HttpStatus;
+import com.litesuits.http.exception.HttpException;
+import com.litesuits.http.request.Request;
+import com.litesuits.http.request.param.HttpParam;
+import com.litesuits.http.response.Response;
+import com.litesuits.http.response.handler.HttpResponseHandler;
 /**
  * 首页界面.
  * 
@@ -56,6 +52,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	public static String LOGINURL = "http://app.deppon.com/center/checkLogin";
 	// 文件解密地址
 	public static String FILEURL = "http://app.deppon.com/center/decryptFile";
+	// 登陆超时时间30秒
+	public static final int TIMEOUT = 30;
 
 	// false：正式环境.
 	public static final boolean ISDEBUG = true;
@@ -80,7 +78,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	// 登陆地址
 	private Button buttonLogin;
 	// 注册
-	private Button zhuceLogin;
+	// private Button zhuceLogin;
 	// 手机号
 	String deviceId = null;
 	// 记住密码
@@ -145,14 +143,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		mSharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		in = getIntent();
-		System.out.println("main---create---" + in);
 
 		// 打开intent
 		if (in != null && in.getData() != null) {
 			openFile = in.getData();
-			System.out.println("main--create-openFile===" + openFile);
 		}
-		System.out.println("init");
 		// 是否记住密码
 		remeberPassword = (CheckBox) findViewById(R.id.remember_password);
 		// 得到本地存储的变量
@@ -160,8 +155,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		String pass = mSharedPreferences.getString("pass", "");
 		String user = mSharedPreferences.getString("userId", "");
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
-		zhuceLogin = (Button) findViewById(R.id.registLogin);
-		System.out.println("main--onCreate,,remeber=="+remeber);
+		// zhuceLogin = (Button) findViewById(R.id.registLogin);
+		System.out.println("main--onCreate,,remeber==" + remeber);
 		// 选择了记住密码
 		if ("true".equals(remeber)) {
 			remeberPassword.setChecked(true);
@@ -171,7 +166,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 
 		// 注册事件
-		zhuceLogin.setOnClickListener(this);
+		// zhuceLogin.setOnClickListener(this);
 		// 登陆事件
 		buttonLogin.setOnClickListener(this);
 		// 点击记住密码的按钮操作
@@ -205,7 +200,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 				});
 
-		System.out.println("main---oncreate()");
 		// 如果设置了记住密码，就自动进行登录验证.
 		if ("true".equals(remeber)) {
 			inputPass.setText(pass);
@@ -214,7 +208,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			// 如果有文件，就直接登录.
 			if (in != null && in.getData() != null) {
 				go(openFile);
-			}else{
+			} else {
 				go(null);
 			}
 		}
@@ -243,6 +237,11 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	private void resetPage() {
+		buttonLogin.setEnabled(true);
+		removeDialog(DIALOG_KEY);
+	}
+
 	/**
 	 * 进行登陆操作
 	 */
@@ -259,71 +258,63 @@ public class MainActivity extends Activity implements OnClickListener {
 			pass = inputPass.getText().toString();
 			showDialog(DIALOG_KEY);
 			buttonLogin.setEnabled(false);
-			new Thread(new LoginClass(name, pass, tm.getDeviceId(), file))
-					.start();
-		}
-	}
+			if ("".equals(name.trim())) {
+				alert("请输入账号");
+				resetPage();
+			} else if ("".equals(pass.trim())) {
+				alert("请输入密码");
+				resetPage();
+			} else { 
+				final Uri _f = file;
+				LiteHttpClient client = LiteHttpClient
+						.getInstance(MainActivity.this);
+				LoginArg arg = new LoginArg(serialId, name, pass);
+				HttpAsyncExcutor asyncExcutor = new HttpAsyncExcutor();
+				asyncExcutor.execute(client, new Request(LOGINURL, arg),
+						new HttpResponseHandler() { 
+							@Override
+							protected void onFailure(Response res, HttpException e) {
+								alert("登陆失败,请检查VPN是否已经开启");
+							}
 
-	private class LoginClass implements Runnable {
-		private String name;
-		private String pass;
-		private String serialId;
-		private Uri file;
+							@Override
+							protected void onSuccess(Response response,
+									HttpStatus arg1,
+									com.litesuits.http.data.NameValuePair[] arg2) {
+								String result = response.getString();
+								if (!"40001".equals(result)) {
+									console(result);
+								}
+								// 否则就进行文件解析处理.
+								else {
+									Map intent = new HashMap();
+									intent.put("name", name);
+									intent.put("pass", pass);
+									intent.put("fileurl", _f);
+									intent.put("serialId", serialId);
 
-		public LoginClass(String name, String pass, String serialId, Uri file) {
-			this.name = name;
-			this.pass = pass;
-			this.serialId = serialId;
-			this.file = file;
-		}
-
-		@Override
-		public void run() {
-			System.out.println("LoginClass--name=" + name + ",pass=" + pass
-					+ ",serialid=" + serialId);
-			DefaultHttpClient httpclient = new DefaultHttpClient();
-			try {
-				HttpPost httpost = new HttpPost(LOGINURL);
-				// 添加参数
-				List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-
-				nvps.add(new BasicNameValuePair("serial", serialId));
-				nvps.add(new BasicNameValuePair("userId", name));
-				nvps.add(new BasicNameValuePair("password", pass));
-
-				httpost.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
-				HttpResponse response = httpclient.execute(httpost);
-				HttpEntity entity = response.getEntity();
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						entity.getContent(), "UTF-8"));
-				// 如果没有登录成功，就弹出提示信息.
-				String result = br.readLine();
-				if (!"40001".equals(result)) {
-					console(result);
-				}
-				// 否则就进行文件解析处理.
-				else {
-					Map intent = new HashMap();
-					intent.put("name", name);
-					intent.put("pass", pass);
-					intent.put("fileurl", file);
-					intent.put("serialId", serialId);
-
-					Message mes = new Message();
-					mes.what = 7;
-					mes.obj = intent;
-					myHandler.sendMessage(mes);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				myHandler.sendEmptyMessage(6);
-			} finally {
-				httpclient.getConnectionManager().shutdown();
+									Message mes = new Message();
+									mes.what = 7;
+									mes.obj = intent;
+									myHandler.sendMessage(mes);
+								}
+							} 
+						}); 
 			}
 		}
-
 	}
 
+	class LoginArg implements HttpParam {
+		private String serial;
+		private String userId;
+		private String password;
+
+		public LoginArg(String serial, String userId, String pass) {
+			this.serial = serial;
+			this.userId = userId;
+			this.password = pass;
+		}
+	} 
 	/**
 	 * 注册.
 	 */
@@ -354,10 +345,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	public void onClick(View v) {
 		if (v.getId() == R.id.buttonLogin) {
-			go(null);
-		} else if (v.getId() == R.id.registLogin) {
-			regist();
-		}
+			if ("".equals(inputUser.getText().toString().trim())) {
+				alert("请输入账号");
+				resetPage();
+			} else if ("".equals(inputPass.getText().toString().trim())) {
+				alert("请输入密码");
+				resetPage();
+			} else {
+				go(null);
+			}
+		} /*
+		 * else if (v.getId() == R.id.registLogin) { regist(); }
+		 */
 	}
 
 	public Handler myHandler = new Handler() {
@@ -365,22 +364,27 @@ public class MainActivity extends Activity implements OnClickListener {
 			switch (msg.what) {
 			case 1:
 				alert("对不起，该用户没有权限");
+				removeDialog(DIALOG_KEY);
 				buttonLogin.setEnabled(true);
 				break;
 			case 2:
 				alert("对不起，手机序列号不匹配");
+				removeDialog(DIALOG_KEY);
 				buttonLogin.setEnabled(true);
 				break;
 			case 3:
 				alert("对不起，密码错误");
+				removeDialog(DIALOG_KEY);
 				buttonLogin.setEnabled(true);
 				break;
 			case 4:
 				alert("对不起，参数错误");
+				removeDialog(DIALOG_KEY);
 				buttonLogin.setEnabled(true);
 				break;
 			case 5:
 				alert("没有安装相关软件，请安装软件后重试");
+				removeDialog(DIALOG_KEY);
 				buttonLogin.setEnabled(true);
 				break;
 			case 6:

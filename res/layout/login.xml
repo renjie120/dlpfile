@@ -93,7 +93,7 @@
             android:text="@string/message_login" >
         </Button>
 
-        <Button
+        <!--   Button
             android:id="@+id/registLogin"
             android:layout_width="@dimen/buttonwidth"
             android:layout_height="@dimen/buttonheight"
@@ -101,7 +101,7 @@
             android:layout_marginLeft="10dp"
             android:background="@drawable/yuanjiaobutton"
             android:text="@string/registLogin_login" >
-        </Button>
+        </Button-->
     </LinearLayout>
 
 </LinearLayout>

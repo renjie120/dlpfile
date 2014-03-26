@@ -58,7 +58,7 @@ public final class R {
         public static final int zoomin=0x7f020011;
     }
     public static final class id {
-        public static final int action_settings=0x7f09001f;
+        public static final int action_settings=0x7f09001e;
         public static final int browserItemIcon=0x7f090003;
         public static final int browserItemText=0x7f090004;
         public static final int browserTabHost=0x7f090002;
@@ -70,25 +70,24 @@ public final class R {
         public static final int button6=0x7f09000c;
         public static final int button7=0x7f09000d;
         public static final int buttonLogin=0x7f090016;
-        public static final int callback_button=0x7f090018;
-        public static final int content=0x7f09001d;
+        public static final int callback_button=0x7f090017;
+        public static final int content=0x7f09001c;
         public static final int edittext1=0x7f090008;
         public static final int goToButton=0x7f09000f;
         public static final int image=0x7f090001;
         public static final int inputName=0x7f090012;
         public static final int inputPass=0x7f090014;
         public static final int menu_name=0x7f090010;
-        public static final int mess1=0x7f090019;
-        public static final int mess2=0x7f09001a;
-        public static final int mess3=0x7f09001b;
-        public static final int mess4=0x7f09001c;
+        public static final int mess1=0x7f090018;
+        public static final int mess2=0x7f090019;
+        public static final int mess3=0x7f09001a;
+        public static final int mess4=0x7f09001b;
         public static final int name_title=0x7f090011;
         public static final int pageNumberTextEdit=0x7f09000e;
         public static final int pager=0x7f090000;
         public static final int pass_title=0x7f090013;
-        public static final int registLogin=0x7f090017;
         public static final int remember_password=0x7f090015;
-        public static final int show=0x7f09001e;
+        public static final int show=0x7f09001d;
         public static final int test_view=0x7f090005;
     }
     public static final class layout {
