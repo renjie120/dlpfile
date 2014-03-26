@@ -62,8 +62,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		if (ISDEBUG) {
 			// 反馈地址
 			EMALADDRESS = "lishuiqing110@163.com";
-			// LOGINURL = "http://10.224.70.10:8081/center/checkLogin";
-			// FILEURL = "http://10.224.70.10:8081/center/decryptFile";
+//			 LOGINURL = "http://10.224.70.132:8083/center/checkLogin";
+//			 FILEURL = "http://10.224.70.132:8083/center/decryptFile";
 			// 登陆地址
 			LOGINURL = "http://192.168.67.47/center/checkLogin";
 			// 文件解密地址

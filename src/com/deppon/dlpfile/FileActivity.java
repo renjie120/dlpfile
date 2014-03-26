@@ -2,11 +2,10 @@ package com.deppon.dlpfile;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.FutureTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,9 +24,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,6 +34,18 @@ import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.litesuits.http.LiteHttpClient;
+import com.litesuits.http.async.HttpAsyncExcutor;
+import com.litesuits.http.data.HttpStatus;
+import com.litesuits.http.data.NameValuePair;
+import com.litesuits.http.exception.HttpException;
+import com.litesuits.http.parser.BinaryParser;
+import com.litesuits.http.parser.FileParser;
+import com.litesuits.http.request.Request;
+import com.litesuits.http.request.param.HttpMethod;
+import com.litesuits.http.response.Response;
+import com.litesuits.http.response.handler.HttpResponseHandler;
 
 /**
  * 文件解密具体操作界面.
@@ -97,13 +106,15 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * @param filename
 	 */
 	private void openFileWithWord(File extDir) {
+		System.out.println("openFileWithWord==" + extDir.getAbsolutePath());
 		// 文件
 		Uri uri = Uri.fromFile(extDir);
 		// 文件名
 		String fileName = extDir.getAbsolutePath();
 		// pm
 		PackageManager pm = this.getPackageManager();
-
+		System.out.println("openFileWithWord==" + uri);
+		
 		try {
 			// 初始化
 			Intent intent = new Intent("android.intent.action.VIEW");
@@ -112,6 +123,7 @@ public class FileActivity extends Activity implements OnClickListener {
 			// pdf文件
 			if (fileName.endsWith(".pdf")) {
 				intent = new Intent(Intent.ACTION_VIEW, uri);
+				intent.setData(uri); 
 				intent.setClass(this,
 						org.vudroid.pdfdroid.PdfViewerActivity.class);
 			}
@@ -368,26 +380,106 @@ public class FileActivity extends Activity implements OnClickListener {
 		// 进行一次处理之后，就设置name为空。
 
 		if (fileuri != null) {
+			Request req = new Request(MainActivity.FILEURL);
+			File extDir = Environment.getExternalStorageDirectory();
+			String filepath = fileuri.getPath();
+			File oldFile = new File(filepath);
+			final String filename = oldFile.getName();
+			LiteHttpClient client = LiteHttpClient.getInstance(this);
+			req.setMethod(HttpMethod.Post)
+					.addParam("file", oldFile, "application/octet-stream")
+					.addParam("userId", name).addParam("password", pass)
+					.addParam("serial", serialId)
+					.addParam("filename", filename);
+			String f = filename;
+			if (filename.endsWith(".docx") || filename.endsWith(".xls")
+					|| filename.endsWith(".xlsx") || filename.endsWith(".ppt")
+					|| filename.endsWith(".pptx") || filename.endsWith(".doc")) {
+				// 如果是office系列就进行文件名转换
+				f = filename.replace(".", "_") + ".pdf";
+			}
+			String dirName = extDir.getAbsolutePath() + "/dlpfiles";
+			// 新地址
+			File newExtDir = new File(dirName);
+			// 目录不存在就创建
+			if (!newExtDir.exists()) {
+				newExtDir.mkdir();
+				// newExtDir.setWritable(true);
+			}
+			// 如果已经存在就删除
+			final File fullFilename = new File(newExtDir, f);
+			// 删除临时文件夹里面文件
+			if (fullFilename.exists()) {
+				fullFilename.deleteOnExit();
+			}
+			req.setDataParser(new BinaryParser());
+			HttpAsyncExcutor asyncExcutor = new HttpAsyncExcutor();
+			System.out.println("使用新方法进行解密");
+			FutureTask<Response> future = asyncExcutor.execute(client, req,
+					new HttpResponseHandler() {
+						@Override
+						protected void onSuccess(Response res,
+								HttpStatus status, NameValuePair[] headers) {
+							// 写文件流
+							BufferedOutputStream bufferedOutputStream = null;
+							try {
+								bufferedOutputStream = new BufferedOutputStream(
+										new FileOutputStream(fullFilename));
+								// 写进去
+								bufferedOutputStream.write(res.getBytes());
+
+							} catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} finally {
+								// 关闭文件流
+								if (bufferedOutputStream != null)
+									try {
+										bufferedOutputStream.close();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+							}
+
+							// 打开文件
+							openFileWithWord(fullFilename);
+							// System.out.println("返回jieguo:"+res.getBytes().length);
+							// openFileWithWord(fullFilename);
+						}
+
+						@Override
+						protected void onFailure(Response res, HttpException e) {
+							System.out.println("请求失败了");
+						}
+					});
+
+			//
+			// // 保存到本地文件流.
+
 			final MyListLoader task = new MyListLoader(true, name, pass,
 					serialId, fileuri);
-			task.execute("");
-			new Thread() {
-				public void run() {
-					try {
-						/**
-						 * 在这里你可以设置超时的时间
-						 * 切记：这段代码必须放到线程中执行，因为不放单独的线程中执行的话该方法会冻结UI线程
-						 * 直接导致onPreExecute()方法中的弹出框不会立即弹出。
-						 */
-						task.get(TIMEOUT, TimeUnit.SECONDS);
-					} catch (InterruptedException e) {
-					} catch (ExecutionException e) {
-					} catch (TimeoutException e) {
-						task.cancel(true);
-						myHandler.sendEmptyMessage(1);
-					}// 请求超时
-				};
-			}.start();
+			// task.execute("");
+			// new Thread() {
+			// public void run() {
+			// try {
+			// /**
+			// * 在这里你可以设置超时的时间
+			// * 切记：这段代码必须放到线程中执行，因为不放单独的线程中执行的话该方法会冻结UI线程
+			// * 直接导致onPreExecute()方法中的弹出框不会立即弹出。
+			// */
+			// task.get(TIMEOUT, TimeUnit.SECONDS);
+			// } catch (InterruptedException e) {
+			// } catch (ExecutionException e) {
+			// } catch (TimeoutException e) {
+			// task.cancel(true);
+			// myHandler.sendEmptyMessage(1);
+			// }// 请求超时
+			// };
+			// }.start();
 		}
 	}
 
@@ -405,20 +497,20 @@ public class FileActivity extends Activity implements OnClickListener {
 	 * 删除文件.
 	 */
 	private void deleteFile() {
-		try {
-			File extDir = Environment.getExternalStorageDirectory();
-			String dirName = extDir.getAbsolutePath() + "/dlpfiles";
-			File newExtDir = new File(dirName);
-			if (newExtDir.exists()) {
-				File[] fls = newExtDir.listFiles();
-				for (File f : fls) {
-					f.delete();
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			myHandler.sendEmptyMessage(2);
-		}
+		// try {
+		// File extDir = Environment.getExternalStorageDirectory();
+		// String dirName = extDir.getAbsolutePath() + "/dlpfiles";
+		// File newExtDir = new File(dirName);
+		// if (newExtDir.exists()) {
+		// File[] fls = newExtDir.listFiles();
+		// for (File f : fls) {
+		// f.delete();
+		// }
+		// }
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// myHandler.sendEmptyMessage(2);
+		// }
 	}
 
 	public void onDestroy() {
